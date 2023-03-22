@@ -1,0 +1,167 @@
+{
+  "root": "root",
+  "objTab": {
+    "root": { "data": {}, "rootLayout": "returnComponent" },
+    "rootLayout": {
+      "id": "rootLayout",
+      "type": "ZStack",
+      "layoutType": "Layout",
+      "data": {
+        "children": [
+          {
+            "pos": { "left": 0, "top": 0, "width": 100, "height": 100 },
+            "content": "bottomH"
+          },
+          {
+            "pos": { "left": 30, "top": 70, "width": 40, "height": 10 },
+            "content": "text"
+          }
+        ]
+      }
+    },
+    "bottomH": {
+      "id": "bottomH",
+      "type": "HVStack",
+      "layoutType": "Layout",
+      "data": {
+        "vertical": false,
+        "children": [
+          { "space": 1, "content": "video1" },
+          { "space": 1, "content": "video2" },
+          { "space": 1, "content": "video3" }
+        ]
+      }
+    },
+    "text": {
+      "id": "text",
+      "type": "Text",
+      "layoutType": "Layout",
+      "data": { "content": "点击你喜欢的衣服" }
+    },
+    "video1": {
+      "id": "video1",
+      "type": "Video",
+      "layoutType": "Layout",
+      "data": {
+        "src": "http://175.24.176.136:15060/Videos/video-2zAnK0WXRb.mp4",
+        "sx": { "objectFit": "cover" },
+        "loop": true,
+        "time": 0,
+        "volume": 100,
+        "length": 0,
+        "play": true
+      }
+    },
+    "video2": {
+      "id": "video2",
+      "type": "Video",
+      "layoutType": "Layout",
+      "data": {
+        "src": "http://175.24.176.136:15060/Videos/video-v4Kz5j7Sit.mp4",
+        "sx": { "objectFit": "cover" },
+        "loop": true,
+        "time": 0,
+        "volume": 100,
+        "length": 0,
+        "play": true
+      }
+    },
+    "video3": {
+      "id": "video3",
+      "type": "Video",
+      "layoutType": "Layout",
+      "data": {
+        "src": "http://175.24.176.136:15060/Videos/video-ixOWNf4RZu.mp4",
+        "sx": { "objectFit": "cover" },
+        "loop": true,
+        "time": 0,
+        "volume": 100,
+        "length": 0,
+        "play": true
+      }
+    },
+    "bigVideo1": {
+      "id": "bigVideo1",
+      "type": "Video",
+      "layoutType": "Layout",
+      "data": {
+        "src": "http://175.24.176.136:15060/Videos/video-2zAnK0WXRb.mp4",
+        "loop": true,
+        "time": 0,
+        "volume": 100,
+        "length": 0,
+        "play": true
+      }
+    },
+    "bigVideo2": {
+      "id": "bigVideo2",
+      "type": "Video",
+      "layoutType": "Layout",
+      "data": {
+        "src": "http://175.24.176.136:15060/Videos/2-7.mp4",
+        "loop": true,
+        "time": 0,
+        "volume": 100,
+        "length": 0,
+        "play": true
+      }
+    },
+    "bigVideo3": {
+      "id": "bigVideo3",
+      "type": "Video",
+      "layoutType": "Layout",
+      "data": {
+        "src": "http://175.24.176.136:15060/Videos/3-5.mp4",
+        "loop": true,
+        "time": 0,
+        "volume": 100,
+        "length": 0,
+        "play": true
+      }
+    },
+    "returnComponent": {
+      "id": "returnComponent",
+      "type": "ReturnComponent",
+      "layoutType": "Component",
+      "children": ["rootLayout", "bigVideo1", "bigVideo2", "bigVideo3"]
+    }
+  },
+  "events": [
+    {
+      "sender": "video1",
+      "event": "onClick",
+      "action": "jump",
+      "args": { "target": "bigVideo1" }
+    },
+    {
+      "sender": "video2",
+      "event": "onClick",
+      "action": "jump",
+      "args": { "target": "bigVideo2" }
+    },
+    {
+      "sender": "video3",
+      "event": "onClick",
+      "action": "jump",
+      "args": { "target": "bigVideo3" }
+    },
+    {
+      "sender": "bigVideo1",
+      "event": "onClick",
+      "action": "jump",
+      "args": { "target": "rootLayout" }
+    },
+    {
+      "sender": "bigVideo2",
+      "event": "onClick",
+      "action": "jump",
+      "args": { "target": "rootLayout" }
+    },
+    {
+      "sender": "bigVideo3",
+      "event": "onClick",
+      "action": "jump",
+      "args": { "target": "rootLayout" }
+    }
+  ]
+}

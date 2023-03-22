@@ -1,0 +1,24 @@
+{
+    "type": "object",
+    "properties": {
+        "root": {
+            "type": "string"
+        },
+        "objTab": {
+            "type": "object"
+        },
+        "events": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "sender": "string",
+                    "event": "string",
+                    "action": "string",
+                    "args": "object"
+                }
+            }
+        }
+    },
+    "required": ["root", "objTab", "events"]
+}

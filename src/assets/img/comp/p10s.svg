@@ -1,0 +1,17 @@
+<svg width="98" height="56" viewBox="0 0 98 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 0.5C1.61929 0.5 0.5 1.61929 0.5 3V53C0.5 54.3807 1.61929 55.5 3 55.5H95C96.3807 55.5 97.5 54.3807 97.5 53V3C97.5 1.61929 96.3807 0.5 95 0.5H3Z" stroke="#1976D2"/>
+<mask id="path-2-inside-1_533_11346" fill="white">
+<path d="M34 1H95C96.1046 1 97 1.89543 97 3V53C97 54.1046 96.1046 55 95 55H34V1Z"/>
+</mask>
+<path d="M34 1H95C96.1046 1 97 1.89543 97 3V53C97 54.1046 96.1046 55 95 55H34V1Z" fill="#1976D2" fill-opacity="0.12" stroke="white" stroke-width="6" mask="url(#path-2-inside-1_533_11346)"/>
+<mask id="path-3-inside-2_533_11346" fill="white">
+<path d="M33 27.5L0.999996 27.5L0.999998 3C0.999998 1.89543 1.89543 0.999997 3 0.999997L33 1L33 27.5Z"/>
+</mask>
+<path d="M33 27.5L0.999996 27.5L0.999998 3C0.999998 1.89543 1.89543 0.999997 3 0.999997L33 1L33 27.5Z" fill="#1976D2" fill-opacity="0.12" stroke="white" stroke-width="6" mask="url(#path-3-inside-2_533_11346)"/>
+<mask id="path-4-inside-3_533_11346" fill="white">
+<path d="M33 28.5L0.999996 28.5L0.999998 53C0.999998 54.1046 1.89543 55 3 55L33 55L33 28.5Z"/>
+</mask>
+<path d="M33 28.5L0.999996 28.5L0.999998 53C0.999998 54.1046 1.89543 55 3 55L33 55L33 28.5Z" fill="#1976D2" fill-opacity="0.12" stroke="white" stroke-width="6" mask="url(#path-4-inside-3_533_11346)"/>
+<rect x="33" y="1" width="1" height="54" fill="#1976D2"/>
+<rect x="33" y="27.5" width="1" height="32" transform="rotate(90 33 27.5)" fill="#1976D2"/>
+</svg>
