@@ -26,43 +26,51 @@ import axios from "axios";
 import { CycleConfig, generateCycleConfig, initConfig } from "./Config";
 import { If } from "../../../components/Vue";
 
-export const CycleDialog = (props: {data: {name?: string}, onSuccessClick: () => void, onButtonClick: () => void}) => {
+export const CycleDialog = (props: {
+  data: { name?: string };
+  onSuccessClick: () => void;
+  onButtonClick: () => void;
+}) => {
   const theme = useTheme();
   const [changed, setChanged] = useState(false);
   const [model, chgModel] = useContext(ModelEditContext)!;
   const [unnamedConfig, chgUnnamedConfig] = useImmer<CycleConfig>(
     model.templateData.template === "Cycle"
-      ? model.templateData.templateConfig as CycleConfig
+      ? (model.templateData.templateConfig as CycleConfig)
       : initConfig()
   );
-  const namedConfig = model.templateData.componentConfig[props.data.name ?? ""]
+  const namedConfig = model.templateData.componentConfig[props.data.name ?? ""];
   const chgNamedConfig = (config: (draft: CycleConfig) => void) => {
-    chgModel(draft => {
-      config(draft.templateData.componentConfig[props.data.name!] as CycleConfig)
-    })
-  }
-  const config = props.data.name ? namedConfig as CycleConfig : unnamedConfig
-  const chgConfig = props.data.name ? chgNamedConfig : chgUnnamedConfig
+    chgModel((draft) => {
+      config(
+        draft.templateData.componentConfig[props.data.name!] as CycleConfig
+      );
+    });
+  };
+  const config = props.data.name ? (namedConfig as CycleConfig) : unnamedConfig;
+  const chgConfig = props.data.name ? chgNamedConfig : chgUnnamedConfig;
   const coverMap = useRef(new Map());
 
   useEffect(() => {
-    const promises = []
+    const promises = [];
     for (const i of config.videos) {
-      if (i === null) continue
+      if (i === null) continue;
       if (!coverMap.current.has(i.cover)) {
-        promises.push(axios.get(i.cover).then(res => {
-          coverMap.current.set(i.cover, res.data)
-        }))
+        promises.push(
+          axios.get(i.cover).then((res) => {
+            coverMap.current.set(i.cover, res.data);
+          })
+        );
       }
     }
     if (promises.length > 0) {
       Promise.all(promises).then(() => {
-        chgConfig(conf => {
-          conf.videos = [...conf.videos]
-        })
-      })
+        chgConfig((conf) => {
+          conf.videos = [...conf.videos];
+        });
+      });
     }
-  }, [chgConfig, config.videos])
+  }, [chgConfig, config.videos]);
 
   const handleSuccessClick = () => {
     chgModel((model) => {
@@ -80,21 +88,22 @@ export const CycleDialog = (props: {data: {name?: string}, onSuccessClick: () =>
       return;
     }
     const file = e.target.files[0];
-    const fileName = encodeURIComponent(file.name)
+    const fileName = encodeURIComponent(file.name);
     const content = await file.arrayBuffer();
     await getWebDavInstance().uploadFile("/Videos/" + fileName, content);
     const turl = URL.createObjectURL(file);
     const url = URIBase + "/Videos/" + fileName;
-    const cover = await getVideoCover(turl);
-    await getWebDavInstance().uploadFile("/Images/" + fileName + ".txt", cover)
-    const coverUrl = URIBase + "/Images/" + fileName + ".txt"
-    coverMap.current.set(coverUrl, cover)
-    chgConfig(conf => {
+    const {cover, length} = await getVideoCover(turl);
+    await getWebDavInstance().uploadFile("/Images/" + fileName + ".txt", cover);
+    const coverUrl = URIBase + "/Images/" + fileName + ".txt";
+    coverMap.current.set(coverUrl, cover);
+    chgConfig((conf) => {
       conf.videos[idx] = {
         cover: coverUrl,
         url,
-      }
-    })
+        length,
+      };
+    });
     console.log(e, cover);
   };
 
@@ -108,7 +117,9 @@ export const CycleDialog = (props: {data: {name?: string}, onSuccessClick: () =>
         </Stack>
         <Stack direction="row" mt={1} px={1}>
           <Box flexGrow={1} mr={2}>
-            <Typography variant="h4">{props.data.name ? "Loop Module" : "Loop Template"}</Typography>
+            <Typography variant="h4">
+              {props.data.name ? "Loop Module" : "Loop Template"}
+            </Typography>
             <Typography
               sx={{
                 mt: 1,
@@ -132,9 +143,9 @@ export const CycleDialog = (props: {data: {name?: string}, onSuccessClick: () =>
                       conf.videos = Array.from(new Array(conf.videoNumber)).map(
                         (_) => null
                       );
-                      conf.videoText = Array.from(new Array(conf.videoNumber)).map(
-                        (_) => null
-                      );
+                      conf.videoText = Array.from(
+                        new Array(conf.videoNumber)
+                      ).map((_) => null);
                       setChanged(true);
                     });
                   }}
@@ -264,43 +275,45 @@ export const CycleDialog = (props: {data: {name?: string}, onSuccessClick: () =>
   );
 };
 
-export const CycleComponentSetting = (props: {name: string}) => {
+export const CycleComponentSetting = (props: { name: string }) => {
   const [model, chgModel] = useContext(ModelEditContext)!;
-  const config = model.templateData.componentConfig[props.name] as CycleConfig
+  const config = model.templateData.componentConfig[props.name] as CycleConfig;
   const chgConfig = (config: (draft: CycleConfig) => void) => {
-    chgModel(draft => {
-      config(draft.templateData.componentConfig[props.name] as CycleConfig)
-    })
-  }
+    chgModel((draft) => {
+      config(draft.templateData.componentConfig[props.name] as CycleConfig);
+    });
+  };
   const [videoSelection, setVideoSelection] = useState(0);
-  const [uploadState, setUploadState] = useState<"noupload" | "uploading" | "uploaded">("noupload")
+  const [uploadState, setUploadState] = useState<
+    "noupload" | "uploading" | "uploaded"
+  >("noupload");
 
   useEffect(() => {
-    setVideoSelection(0)
-  }, [props.name])
+    setVideoSelection(0);
+  }, [props.name]);
 
   useEffect(() => {
-    setUploadState("noupload")
-  }, [videoSelection])
+    setUploadState("noupload");
+  }, [videoSelection]);
 
   const handleFileUploaded = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) {
       return;
     }
-    setUploadState('uploading')
+    setUploadState("uploading");
     const file = e.target.files[0];
     const content = await file.arrayBuffer();
     await getWebDavInstance().uploadFile("/Videos/" + file.name, content);
     const url = URIBase + "/Videos/" + file.name;
-    chgConfig(config => {
+    chgConfig((config) => {
       if (config.videos[videoSelection]) {
         config.videos[videoSelection]!.url = url;
       } else {
-        config.videos[videoSelection] = {url, cover: ""}
+        config.videos[videoSelection] = { url, cover: "", length: null };
       }
-    })
-    setUploadState('uploaded')
-  }
+    });
+    setUploadState("uploaded");
+  };
 
   return (
     <>
@@ -336,26 +349,32 @@ export const CycleComponentSetting = (props: {name: string}) => {
             }}
           />
         </Stack>
-        <Typography>Add Video</Typography>
-        <Select
-          size="small"
-          value={videoSelection}
-          onChange={(e) => {
-            setVideoSelection(Number(e.target.value));
-          }}
-        >
-          {Array.from(new Array(config.videoNumber)).map((k, idx) => (
-            <MenuItem
-              value={idx}
-              key={idx}
-            >
-              Video {idx + 1}
-            </MenuItem>
-          ))}
-        </Select>
-        <Box component="input" aria-label="uploader" type="file" onChange={handleFileUploaded} />
-        <If v-if={uploadState !== "noupload"}>
-          <Typography>{uploadState === "uploading" ? "上传中，请等待" : "上传成功"}</Typography>
+        <If v-if={false}>
+          <Typography>Add Video</Typography>
+          <Select
+            size="small"
+            value={videoSelection}
+            onChange={(e) => {
+              setVideoSelection(Number(e.target.value));
+            }}
+          >
+            {Array.from(new Array(config.videoNumber)).map((k, idx) => (
+              <MenuItem value={idx} key={idx}>
+                Video {idx + 1}
+              </MenuItem>
+            ))}
+          </Select>
+          <Box
+            component="input"
+            aria-label="uploader"
+            type="file"
+            onChange={handleFileUploaded}
+          />
+          <If v-if={uploadState !== "noupload"}>
+            <Typography>
+              {uploadState === "uploading" ? "上传中，请等待" : "上传成功"}
+            </Typography>
+          </If>
         </If>
       </Stack>
     </>

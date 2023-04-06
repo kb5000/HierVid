@@ -4,7 +4,7 @@ import { Position } from "../../../tools/Interfaces";
 export interface CycleConfig {
   videoNumber: number;
   autoCycle: boolean;
-  videos: ({ cover: string; url: string } | null)[];
+  videos: ({ cover: string; url: string; length: number | null } | null)[];
   videoText: (
     | (Position & {
         text: string;
@@ -75,7 +75,7 @@ export const generateCycleConfig = (
         loop: false,
         time: 0,
         volume: 100,
-        length: null,
+        length: config.videos[i]?.length ?? null,
         play: true,
       },
     };

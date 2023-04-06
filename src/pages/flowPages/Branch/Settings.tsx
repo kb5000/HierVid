@@ -281,7 +281,7 @@ export const BranchDialog = (props: {data: {name?: string}, onSuccessClick: () =
                 />
               </Stack>
               <Stack direction="row" mt={2}>
-                <Typography mt={1}>Branch Style</Typography>
+                <Typography mt={1}>Root Style</Typography>
                 <Box flexGrow={1} />
                 <Select
                   size="small"
@@ -414,11 +414,11 @@ export const BranchComponentSetting = (props: {name: string}) => {
       config(draft.templateData.componentConfig[props.name] as BranchConfig)
     })
   }
-  const [videoSelection, setVideoSelection] = useState("start");
+  const [videoSelection, setVideoSelection] = useState("window");
   const [uploadState, setUploadState] = useState<"noupload" | "uploading" | "uploaded">("noupload")
 
   useEffect(() => {
-    setVideoSelection("start")
+    setVideoSelection("window")
   }, [props.name])
 
   useEffect(() => {
@@ -477,7 +477,7 @@ export const BranchComponentSetting = (props: {name: string}) => {
           />
         </Stack>
         <Stack direction="row">
-          <Typography mt={1}>Branch Style</Typography>
+          <Typography mt={1}>Root Style</Typography>
           <Box flexGrow={1} />
           <Select
             size="small"
@@ -522,43 +522,45 @@ export const BranchComponentSetting = (props: {name: string}) => {
             <Box sx={{ position: "relative", minWidth: "1px" }} />
           </Stack>
         </HorizontalScroller>
-        <Typography>Upload video</Typography>
-        <Select
-          size="small"
-          value={videoSelection}
-          onChange={(e) => {
-            setVideoSelection(e.target.value);
-          }}
-        >
-          <MenuItem value={"start"} key="start">
-            Start
-          </MenuItem>
-          {config.style === 0 ? (
-            <MenuItem value={"branch"} key="branch">
-              Branching
+        <If v-if={false}>
+          <Typography>Upload video</Typography>
+          <Select
+            size="small"
+            value={videoSelection}
+            onChange={(e) => {
+              setVideoSelection(e.target.value);
+            }}
+          >
+            <MenuItem value={"start"} key="start">
+              Start
             </MenuItem>
-          ) : (
-            Array.from(new Array(config.branchNumber)).map((k, idx) => (
+            {config.style === 0 ? (
+              <MenuItem value={"branch"} key="branch">
+                Branching
+              </MenuItem>
+            ) : (
+              Array.from(new Array(config.branchNumber)).map((k, idx) => (
+                <MenuItem
+                  value={"branch_" + idx}
+                  key={"branch_" + idx}
+                >
+                  Branch {idx + 1}
+                </MenuItem>
+              ))
+            )}
+            {Array.from(new Array(config.branchNumber)).map((k, idx) => (
               <MenuItem
-                value={"branch_" + idx}
-                key={"branch_" + idx}
+                value={"content_" + idx}
+                key={"content_" + idx}
               >
                 Branch {idx + 1}
               </MenuItem>
-            ))
-          )}
-          {Array.from(new Array(config.branchNumber)).map((k, idx) => (
-            <MenuItem
-              value={"content_" + idx}
-              key={"content_" + idx}
-            >
-              Branch {idx + 1}
-            </MenuItem>
-          ))}
-        </Select>
-        <Box component="input" aria-label="uploader" type="file" onChange={handleFileUploaded} />
-        <If v-if={uploadState !== "noupload"}>
-          <Typography>{uploadState === "uploading" ? "上传中，请等待" : "上传成功"}</Typography>
+            ))}
+          </Select>
+          <Box component="input" aria-label="uploader" type="file" onChange={handleFileUploaded} />
+          <If v-if={uploadState !== "noupload"}>
+            <Typography>{uploadState === "uploading" ? "上传中，请等待" : "上传成功"}</Typography>
+          </If>
         </If>
       </Stack>
     </>

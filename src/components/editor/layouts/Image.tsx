@@ -1,10 +1,11 @@
-import { Box, Button, Stack, TextField, Typography } from "@mui/material"
+import { Box, Button, MenuItem, Stack, TextField, Typography } from "@mui/material"
 import { useCallback, useContext, useState } from "react"
 import { ModelEditContext } from "../../../pages/flowPages/Detailed"
 import { Layout } from "../../../schema/PlayModel"
 import { ImageProps } from "../../player/layouts/Image"
 import { Uploader } from "../../Uploader"
 import { EditorArgs } from "../EditorWrapper"
+import { URIBase, getWebDavInstance } from "../../../tools/Backend"
 
 export type { ImageProps } from "../../player/layouts/Image"
 
@@ -97,18 +98,40 @@ export const ImagePropertyPage = (props: {
     }
   };
 
+  const handleUploadClick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("uploading")
+    if (e.target.files?.length) {
+      const file = e.target.files[0]
+      const fileName = encodeURIComponent(file.name);
+      await getWebDavInstance().uploadFile("/Images/" + fileName, file);
+      const url = URIBase + "/Images/" + fileName
+      chgModel(model => {
+        const data: ImageProps["data"] = (
+          model.objTab[props.layout.id] as Layout
+        ).data;
+        data.src = url
+      })
+    }
+  }
+
   return (
     <Stack spacing={1}>
-      <Typography fontSize="1.3em">图片设置</Typography>
+      <Typography fontSize="1.3em">Image Setting</Typography>
       <TextField
         variant="standard"
-        label="点击跳转到"
+        label="Jump to"
+        select
         value={clickTo ?? ""}
         onChange={(val) => handleChange(val.target.value, "jump")}
-      />
+      >
+        <MenuItem key="" value="">(None)</MenuItem>
+        {Object.keys(model.timeNodes).map(x => (
+          <MenuItem key={x} value={x}>{x}</MenuItem>
+        ))}
+      </TextField>
       <TextField
         variant="standard"
-        label="图片地址"
+        label="Image Source"
         value={data.src}
         onChange={(val) => handleChange(val.target.value, "src")}
       />
@@ -118,8 +141,8 @@ export const ImagePropertyPage = (props: {
             position: "absolute",
           }}
         >
-          <Button variant="contained" size="small">上传</Button>
-          <Uploader />
+          <Button variant="contained" size="small">Upload</Button>
+          <Uploader onChange={handleUploadClick} />
         </Box>
       </Box>
     </Stack>

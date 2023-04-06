@@ -11,7 +11,7 @@ import { ObservableEvent, calcMainVideo } from "./Player";
 import { BranchConfig } from "../pages/flowPages/Branch/Config";
 import { CycleConfig } from "../pages/flowPages/Cycle/Config";
 import { CheckConfig } from "../pages/flowPages/Check/Config";
-import { getWebDavInstance, URIBase } from "../tools/Backend";
+import { getVideoCover, getWebDavInstance, URIBase } from "../tools/Backend";
 
 export const ComponentPlayer = (props: { data: PlayModel, timeReactive?: Observable<ObservableEvent> }) => {
   const { objTab, root, events } = props.data;
@@ -137,8 +137,9 @@ export const ComponentPlayer = (props: { data: PlayModel, timeReactive?: Observa
           const file: File = e.args.file;
           const content = await file.arrayBuffer();
           await getWebDavInstance().uploadFile("/Videos/" + file.name, content);
-          // const turl = URL.createObjectURL(file);
+          const turl = URL.createObjectURL(file);
           const url = URIBase + "/Videos/" + file.name;
+          const {cover, length} = await getVideoCover(turl);
 
           chgModel(model => {
             const sender: Layout = model.objTab[e.sender]
@@ -153,18 +154,21 @@ export const ComponentPlayer = (props: { data: PlayModel, timeReactive?: Observa
               case "Check": {
                 const name = sender.id.slice((config as BranchConfig | CheckConfig).prefix.length);
                 (config as BranchConfig | CheckConfig).videos[name] = url;
+                (config as BranchConfig | CheckConfig).videoLength[name] = length;
                 break
               }
               case "Cycle": {
                 const idx = Number(sender.id.split("play")[1]);
                 (config as CycleConfig).videos[idx] = {
                   url: url,
-                  cover: "",
+                  cover: cover,
+                  length: length,
                 }
                 break
               }
             }
             sender.data.src = url
+            sender.data.length = length!
           })
         })
 

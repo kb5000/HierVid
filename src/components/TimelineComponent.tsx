@@ -28,6 +28,7 @@ import {
   ContentCut,
   ContentPaste,
   Delete,
+  DeleteOutline,
   HighlightAlt,
   KeyboardDoubleArrowRight,
   LinearScale,
@@ -40,6 +41,7 @@ import {
   PanToolAlt,
   Schema,
   Shuffle,
+  SpaceBar,
   TouchApp,
 } from "@mui/icons-material";
 import {
@@ -474,7 +476,7 @@ export const getVideoLayout = async (
   }
   const mainVideo = calcMainVideo(objs[root], objs);
   if (mainVideo.longestVideo) {
-    const cover = await getVideoCover(objs[mainVideo.longestVideo].data.src);
+    const {cover} = await getVideoCover(objs[mainVideo.longestVideo].data.src);
     return cover;
   } else {
     return null;
@@ -774,7 +776,7 @@ export const TimelineComponent = (props: {
 
   const handleAddToolClick = (component: ComponentType, isReplace: boolean) => {
     const componentFunc: Record<ComponentType, any> = {
-      Branch: [initBranchConfig, generateBranchConfig, "start"],
+      Branch: [initBranchConfig, generateBranchConfig, "window"],
       Cycle: [initCycleConfig, generateCycleConfig, "video0"],
       Check: [initCheckConfig, generateCheckConfig, "window"],
     };
@@ -1017,7 +1019,9 @@ export const TimelineComponent = (props: {
             .then((res) => {
               newCovers[i] = res;
             })
-            .catch((err) => {})
+            .catch((err) => {
+              console.log(err)
+            })
         );
       }
       Promise.all(promises).then(() => {
@@ -1212,11 +1216,12 @@ export const TimelineComponent = (props: {
           top: 8,
           left: 4,
           zIndex: 200,
+          width: "100%"
         }}
       >
         <IconButton
           size="small"
-          title="向上一级"
+          title="Up"
           onClick={handleUpToolClick}
           disabled={currentLayer === null}
         >
@@ -1224,7 +1229,7 @@ export const TimelineComponent = (props: {
         </IconButton>
         <IconButton
           size="small"
-          title="替换组件"
+          title="Substitute Component"
           onClick={(e) => setPopoverAnchor2(e.currentTarget)}
           disabled={globalTime[0] in timeNodes.arrs}
         >
@@ -1236,18 +1241,18 @@ export const TimelineComponent = (props: {
           onClose={() => setPopoverAnchor2(null)}
         >
           <MenuItem onClick={() => handleAddToolClick("Branch", true)}>
-            分支组件
+            Branching Module
           </MenuItem>
           <MenuItem onClick={() => handleAddToolClick("Cycle", true)}>
-            循环组件
+            Loop Module
           </MenuItem>
           <MenuItem onClick={() => handleAddToolClick("Check", true)}>
-            对比展示组件
+            Comparison Module
           </MenuItem>
         </Menu>
         <IconButton
           size="small"
-          title="添加组件"
+          title="Add Component"
           onClick={(e) => setPopoverAnchor(e.currentTarget)}
         >
           <Add />
@@ -1294,19 +1299,19 @@ export const TimelineComponent = (props: {
             />
           </Stack>
         </Dialog>
-        <IconButton
+        {/* <IconButton
           size="small"
           title="删除组件"
           onClick={() => handleDeleteToolClick()}
         >
           <Delete />
-        </IconButton>
+        </IconButton> */}
         <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
         <IconButton
           size="small"
           onClick={() => handleToolClick("cursor")}
           color={toolState === "cursor" ? "primary" : "default"}
-          title="选择模式"
+          title="Selection Mode"
         >
           <NearMe sx={{ transform: "rotateY(180deg)" }} />
         </IconButton>
@@ -1314,7 +1319,7 @@ export const TimelineComponent = (props: {
           size="small"
           onClick={() => handleToolClick("move")}
           color={toolState === "move" ? "primary" : "default"}
-          title="移动模式"
+          title="Move Mode"
         >
           <PanTool />
         </IconButton>
@@ -1340,6 +1345,21 @@ export const TimelineComponent = (props: {
         <Typography p={1}>{`Current Module: ${
           timeNodes.objs[globalTime[0]]?.data?.component ?? "Null"
         }`}</Typography>
+        <Box flexGrow={1} />
+        <Box mr={2}>
+          <IconButton
+            size="small"
+            title="Remove Component"
+            onClick={() => handleDeleteToolClick()}
+            sx={{
+              '&:hover': {
+                color: theme.palette.error.main
+              }
+            }}
+          >
+            <DeleteOutline />
+          </IconButton>
+        </Box>
       </Stack>
       <HorizontalScroller sx={{ height: "100%" }} ref={timeAreaRef}>
         <Box

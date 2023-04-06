@@ -28,6 +28,7 @@ import {
   ContentCut,
   ContentPaste,
   Delete,
+  DeleteOutline,
   HighlightAlt,
   LinearScale,
   Merge,
@@ -61,8 +62,19 @@ import React, {
 import { useImmer } from "use-immer";
 import { v4 } from "uuid";
 import { ModelEditContext } from "../pages/flowPages/Detailed";
-import { PortData, TimeNodeData, VideoNode, VideoPort } from "../schema/Components";
-import { ComponentModel, Layout, pickFirst2, PlayModel, Scene } from "../schema/PlayModel";
+import {
+  PortData,
+  TimeNodeData,
+  VideoNode,
+  VideoPort,
+} from "../schema/Components";
+import {
+  ComponentModel,
+  Layout,
+  pickFirst2,
+  PlayModel,
+  Scene,
+} from "../schema/PlayModel";
 import { getVideoCover } from "../tools/Backend";
 import { drawCurveWithArrow } from "../tools/Curve";
 import { Observable, useObserve, useReactive } from "../tools/Reactive";
@@ -224,7 +236,7 @@ const InnerTimeNode = (props: {
       >
         <Box
           component="img"
-          src={props.img ?? (process.env.PUBLIC_URL + "/img/Group 38.png")}
+          src={props.img ?? process.env.PUBLIC_URL + "/img/Group 38.png"}
           sx={{ width: "100%", height: "50px", objectFit: "cover" }}
           draggable={false}
         />
@@ -433,19 +445,21 @@ const TimeNodeBackground = ({
   );
 };
 
-export const getVideoLayout = async (root: string, objs: Record<string, any>) => {
+export const getVideoLayout = async (
+  root: string,
+  objs: Record<string, any>
+) => {
   if (!(root in objs)) {
-    return null
+    return null;
   }
-  const mainVideo = calcMainVideo(objs[root], objs)
+  const mainVideo = calcMainVideo(objs[root], objs);
   if (mainVideo.longestVideo) {
-    const cover = await getVideoCover(objs[mainVideo.longestVideo].data.src)
-    return cover
+    const {cover} = await getVideoCover(objs[mainVideo.longestVideo].data.src);
+    return cover;
   } else {
-    return null
+    return null;
   }
-}
-
+};
 
 interface VideoPortDisplay {
   type: "in" | "out";
@@ -470,43 +484,46 @@ export const Timeline2 = (props: {
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
   const theme = useTheme();
-  const loaded = useRef(false);
 
-  const [canvasWidth, setCanvasWidth] = useState<number | undefined>();
   const [toolState, setToolState] = useState<ToolType>("cursor");
   const [nodeDragging, setNodeDragging] = useState<any>(null);
   const [currentLayer, setCurrentLayer] = useState<string | null>(null);
-  const [model, chgModel] = useContext(ModelEditContext)!
+  const [model, chgModel] = useContext(ModelEditContext)!;
   const timeNodes = {
     objs: model.timeNodes,
     arrs: model.timeArrs,
-  }
-  const chgTimeNodes = (func: (draft: typeof timeNodes, modelDraft?: PlayModel) => void) => {
-    chgModel(draft => {
-      func({
-        objs: draft.timeNodes,
-        arrs: draft.timeArrs
-      }, draft)
-    })
-  }
-  const [timeCovers, setTimeCovers] = useState<(string | null)[]>([])
+  };
+  const chgTimeNodes = (
+    func: (draft: typeof timeNodes, modelDraft?: PlayModel) => void
+  ) => {
+    chgModel((draft) => {
+      func(
+        {
+          objs: draft.timeNodes,
+          arrs: draft.timeArrs,
+        },
+        draft
+      );
+    });
+  };
+  const [timeCovers, setTimeCovers] = useState<(string | null)[]>([]);
 
   const [globalTime, realSetGlobalTime] = useState<[string, number]>([
     timeNodes.arrs[currentLayer ?? "_null"][0],
     0,
   ]);
   const setGlobalTime = (time: [string, number]) => {
-    realSetGlobalTime(time)
+    realSetGlobalTime(time);
     props.timeReactive.emit({
       sender: "timeline",
       layout: "timeline",
       event: "jump",
       args: {
         isLeaf: !(time[0] in timeNodes.arrs),
-        time: time
-      }
-    })
-  }
+        time: time,
+      },
+    });
+  };
   const depth = useMemo(() => {
     let cur = currentLayer;
     let res = 0;
@@ -596,7 +613,8 @@ export const Timeline2 = (props: {
         timeNodes.objs[newNode.id] = newNode;
         cur[overIdx] = newNode.id;
         timeNodes.arrs[newNode.id] = [over, active];
-        setGlobalTime([newNode.id, 0]);
+        setGlobalTime([over, 0]);
+        setCurrentLayer(newNode.id);
       }
     });
   };
@@ -667,8 +685,13 @@ export const Timeline2 = (props: {
     });
   };
 
-  const generateNewNode = (draft: typeof timeNodes, modelDraft: PlayModel, id?: string, layer?: string | null) => {
-    let usedLayer = typeof(layer) === 'undefined' ? currentLayer : layer
+  const generateNewNode = (
+    draft: typeof timeNodes,
+    modelDraft: PlayModel,
+    id?: string,
+    layer?: string | null
+  ) => {
+    let usedLayer = typeof layer === "undefined" ? currentLayer : layer;
     const obj = {
       id: id ?? v4(),
       parent: usedLayer,
@@ -680,15 +703,14 @@ export const Timeline2 = (props: {
     draft.arrs[usedLayer ?? "_null"].push(obj.id);
     modelDraft.objTab[obj.id] = {
       id: obj.id,
-      type: "Text",
+      type: "ZStack",
       layoutType: "Layout",
       parent: null,
       endTo: null,
       data: {
-        content: "",
-        sx: {},
-      }
-    }
+        children: []
+      },
+    };
   };
 
   const handleAddToolClick = () => {
@@ -705,9 +727,9 @@ export const Timeline2 = (props: {
     // 4. 删除timeNodes
     // 5. 删除objTab
     // 6. 如果这个场景是最后一个，生成一个同名的
-    const deleted = new Set<string>()
+    const deleted = new Set<string>();
     const recursiveDel = (draft: typeof timeNodes, id: string) => {
-      deleted.add(id)
+      deleted.add(id);
       if (!(id in draft.arrs)) {
         delete draft.objs[id];
         return;
@@ -719,7 +741,7 @@ export const Timeline2 = (props: {
         recursiveDel(draft, i);
       }
     };
-    let newGlobalTime: [string, number] = [...globalTime]
+    let newGlobalTime: [string, number] = [...globalTime];
     chgTimeNodes((draft, modelDraft) => {
       if (!globalTime[0]) {
         return;
@@ -737,60 +759,90 @@ export const Timeline2 = (props: {
         // 只剩一个的情况
         recursiveDel(draft, draft.arrs["_null"][0]);
         // setTimeout(() => setCurrentLayer(null), 0);
-        setCurrentLayer(null)
+        setCurrentLayer(null);
         const removed = draft.arrs["_null"].splice(0, 1);
         generateNewNode(draft, modelDraft!, removed[0], null);
-        newGlobalTime = [draft.arrs["_null"][0], 0]
+        newGlobalTime = [draft.arrs["_null"][0], 0];
         console.log(JSON.parse(JSON.stringify(draft)));
       } else {
         const parent = draft.objs[toRemove].parent;
         setCurrentLayer(parent);
         const targetIndex = draft.arrs[parent ?? "_null"].indexOf(toRemove);
         draft.arrs[parent ?? "_null"].splice(targetIndex, 1);
-        newGlobalTime = [pickFirst2(draft.arrs[parent ?? "_null"][0], modelDraft!)!, 0]
-        console.log([pickFirst2(draft.arrs[parent ?? "_null"][0], modelDraft!)!, 0])
+        newGlobalTime = [
+          pickFirst2(draft.arrs[parent ?? "_null"][0], modelDraft!)!,
+          0,
+        ];
+        console.log([
+          pickFirst2(draft.arrs[parent ?? "_null"][0], modelDraft!)!,
+          0,
+        ]);
         recursiveDel(draft, toRemove);
       }
       for (const i in modelDraft!.timeNodes) {
-        const node = modelDraft!.timeNodes[i]
-        const removePorts = new Set<number>()
+        const node = modelDraft!.timeNodes[i];
+        const removePorts = new Set<number>();
         for (let j = 0; j < node.ports.length; j++) {
           if (deleted.has(node.ports[j].target)) {
-            removePorts.add(j)
+            removePorts.add(j);
           }
         }
-        node.ports = node.ports.filter((val, idx) => !removePorts.has(idx))
+        node.ports = node.ports.filter((val, idx) => !removePorts.has(idx));
       }
-      const newEvents = []
+      const newEvents = [];
       for (const i of modelDraft!.events) {
         if (!deleted.has(i.args.target)) {
-          newEvents.push(i)
+          newEvents.push(i);
         }
       }
-      modelDraft!.events = newEvents
-      setTimeout(() => setGlobalTime(newGlobalTime), 0)
+      modelDraft!.events = newEvents;
+      setTimeout(() => setGlobalTime(newGlobalTime), 0);
     });
-    setTimeout(() => setGlobalTime([...newGlobalTime]), 0)
+    setTimeout(() => setGlobalTime([...newGlobalTime]), 0);
   };
 
-  const handleKeyPress = (e: KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Backspace" || e.key === "Delete") {
-      handleDeleteToolClick()
+      handleDeleteToolClick();
     }
+  };
+
+  const updateCovers = () => {
+    console.log("update covers")
+    try {
+      const newCovers: (string | null)[] = [];
+      const promises = [];
+      for (let i of timeNodes.arrs[currentLayer ?? "_null"]) {
+        newCovers.push(null);
+      }
+      for (let i = 0; i < newCovers.length; i++) {
+        if (newCovers[i]) {
+          continue
+        }
+        promises.push(
+          getVideoLayout(
+            timeNodes.arrs[currentLayer ?? "_null"][i],
+            model.objTab
+          )
+            .then((res) => {
+              newCovers[i] = res;
+            })
+            .catch((err) => {
+              console.log(err)
+            })
+        );
+      }
+      Promise.all(promises).then(() => {
+        setTimeCovers(newCovers);
+      });
+    } catch (e) {}
   }
 
   useEffect(() => {
-    if (timeNodeBoxRef.current) {
-      setCanvasWidth(timeNodeBoxRef.current.scrollWidth);
-    }
+    setTimeout(() => {
+      setTimePosByMouseX(0)
+    }, 50)
   }, []);
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyPress)
-    return () => {
-      window.removeEventListener('keydown', handleKeyPress)
-    }
-  }, [timeNodes.objs, timeNodes.arrs, currentLayer, globalTime])
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -798,6 +850,7 @@ export const Timeline2 = (props: {
       canvasRef.current.height = canvasRef.current.scrollHeight;
 
       const ctx = canvasRef.current.getContext("2d");
+      ctx!.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
 
       const outPortList: VideoPortDisplay[] = [];
       const inPortList: VideoPortDisplay[] = [];
@@ -805,7 +858,7 @@ export const Timeline2 = (props: {
       const idToPos: { [x: string]: [number, number] } = {};
 
       for (let i of timeNodes.arrs[currentLayer ?? "_null"]) {
-        const node = timeNodes.objs[i]
+        const node = timeNodes.objs[i];
         idToPos[node.id] = [left, node.width];
         left += node.width + 8;
       }
@@ -813,23 +866,23 @@ export const Timeline2 = (props: {
       const getPosById = (id: string) => {
         let nId: string | null = id;
         while (nId && !(nId in idToPos)) {
-          nId = timeNodes.objs[nId].parent
+          nId = timeNodes.objs[nId].parent;
         }
-        if (nId) return idToPos[nId]
-        else return null
-      }
-      
+        if (nId) return idToPos[nId];
+        else return null;
+      };
+
       left = 16;
 
       const clearNodeBuf = (nodeBuf: PortData[], i: TimeNodeData) => {
         if (nodeBuf.length === 0) return;
         const rep = nodeBuf[0];
         let pos = left + rep.fromTime * (i.width - 16);
-        let realLen = 0
+        let realLen = 0;
         for (let j of nodeBuf) {
-          const tar = getPosById(j.target)
+          const tar = getPosById(j.target);
           if (!tar) {
-            continue
+            continue;
           }
           realLen += 1;
           let left = tar[0] + j.toTime * (tar[1] - 16);
@@ -843,9 +896,10 @@ export const Timeline2 = (props: {
             ctx: ctx!,
             from: [pos, 56],
             to: [left + (pos > left ? 8 : 0), 64],
-            color: globalTime[0] === i.id
-              ? theme.palette.primary.main
-              : theme.palette.grey[400],
+            color:
+              globalTime[0] === i.id
+                ? theme.palette.primary.main
+                : theme.palette.grey[400],
           });
         }
         if (realLen > 0) {
@@ -867,25 +921,25 @@ export const Timeline2 = (props: {
           const subNode = subNodeStack.pop()!;
           for (const j of subNode.ports) {
             let targetPar = timeNodes.objs[j.target];
-            let selfContains = false
+            let selfContains = false;
             while (targetPar.parent) {
               if (targetPar.parent === i) {
-                selfContains = true
-                break
+                selfContains = true;
+                break;
               }
-              targetPar = timeNodes.objs[targetPar.parent]
+              targetPar = timeNodes.objs[targetPar.parent];
             }
             if (!selfContains) {
-              subNodes.push(j)
+              subNodes.push(j);
             }
           }
           if (subNode.id in timeNodes.arrs) {
             for (let i of timeNodes.arrs[subNode.id]) {
-              subNodeStack.push(timeNodes.objs[i])
+              subNodeStack.push(timeNodes.objs[i]);
             }
           }
         }
-        subNodes = subNodes.sort((a, b) => a.fromTime - b.fromTime)
+        subNodes = subNodes.sort((a, b) => a.fromTime - b.fromTime);
         for (let j of subNodes) {
           if (
             nodeBuf.length === 0 ||
@@ -894,46 +948,40 @@ export const Timeline2 = (props: {
             nodeBuf.push(j);
           } else {
             clearNodeBuf(nodeBuf, node);
-            nodeBuf = [j]
+            nodeBuf = [j];
           }
         }
         clearNodeBuf(nodeBuf, node);
-        nodeBuf = []
+        nodeBuf = [];
         left += node.width + 8;
       }
 
-      const newNodePorts = inPortList.concat(outPortList)
-      setNodePorts(newNodePorts)
+      const newNodePorts = inPortList.concat(outPortList);
+      setNodePorts(newNodePorts);
 
-      try {
-        const newCovers: (string | null)[] = []
-        const promises = []
-        for (let _i of timeNodes.arrs[currentLayer ?? "_null"]) {
-          newCovers.push(null)
-        }
-        for (let i = 0; i < newCovers.length; i++) {
-          promises.push(getVideoLayout(timeNodes.arrs[currentLayer ?? "_null"][i], model.objTab).then(res => {
-            newCovers[i] = res
-            // console.log(res)
-          }))
-        }
-        Promise.all(promises).then(() => {
-          setTimeCovers(newCovers)
-        })
-      } catch (e) {
-
-      }
+      updateCovers()
     }
-  }, [timeNodes.objs, timeNodes.arrs, currentLayer, globalTime, theme.palette.primary.main, theme.palette.grey, canvasRef.current]);
+  }, [
+    timeNodes.objs,
+    timeNodes.arrs,
+    currentLayer,
+    globalTime,
+    canvasRef.current,
+    timeAreaRef.current,
+    model.objTab,
+    timeNodeBoxRef.current?.scrollWidth
+  ]);
 
-  useObserve(props.timeReactive, r => {
-    r
-      .filter(e => e.event === "jump" && e.layout === "Player")
-      .map(e => {
-        setCurrentLayer(timeNodes.objs[e.args.time[0]].parent)
-        realSetGlobalTime(e.args.time as (typeof globalTime))
-      })
-  }, [timeNodes.objs, timeNodes.arrs, currentLayer, globalTime])
+  useObserve(
+    props.timeReactive,
+    (r) => {
+      r.filter((e) => e.event === "jump" && e.layout === "Player").map((e) => {
+        setCurrentLayer(timeNodes.objs[e.args.time[0]].parent);
+        realSetGlobalTime(e.args.time as typeof globalTime);
+      });
+    },
+    [timeNodes.objs, timeNodes.arrs, currentLayer, globalTime]
+  );
 
   const timeNodeInner = (
     <>
@@ -968,7 +1016,7 @@ export const Timeline2 = (props: {
   );
 
   return (
-    <React.Fragment>
+    <Box onKeyDown={(e) => handleKeyPress(e)} tabIndex={0} sx={{position: "relative", width: "100%", height: "100%"}}>
       <Stack
         direction="row"
         sx={{
@@ -976,40 +1024,41 @@ export const Timeline2 = (props: {
           top: 8,
           left: 4,
           zIndex: 200,
+          width: "100%"
         }}
       >
         <IconButton
           size="small"
-          title="向上一级"
+          title="Up"
           onClick={handleUpToolClick}
           disabled={currentLayer === null}
         >
           <ArrowUpward />
         </IconButton>
-        <IconButton size="small" title="新增场景" onClick={handleAddToolClick}>
+        <IconButton size="small" title="Add Event" onClick={handleAddToolClick}>
           <Add />
         </IconButton>
-        <IconButton
+        {/* <IconButton
           size="small"
           title="删除场景"
           onClick={handleDeleteToolClick}
         >
           <Delete />
-        </IconButton>
+        </IconButton> */}
         <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
         <IconButton
           size="small"
           onClick={() => handleToolClick("cursor")}
           color={toolState === "cursor" ? "primary" : "default"}
-          title="选择模式"
+          title="Selection Mode"
         >
-          <NearMe sx={{transform: "rotateY(180deg)"}} />
+          <NearMe sx={{ transform: "rotateY(180deg)" }} />
         </IconButton>
         <IconButton
           size="small"
           onClick={() => handleToolClick("move")}
           color={toolState === "move" ? "primary" : "default"}
-          title="移动模式"
+          title="Move Mode"
         >
           <PanTool />
         </IconButton>
@@ -1017,22 +1066,22 @@ export const Timeline2 = (props: {
           size="small"
           onClick={() => handleToolClick("merge")}
           color={toolState === "merge" ? "primary" : "default"}
-          title="合并模式"
+          title="Merge Mode"
         >
           <Merge />
         </IconButton>
         <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-        <IconButton size="small" title="剪切" disabled>
+        <IconButton size="small" title="Cut" disabled>
           <ContentCut />
         </IconButton>
-        <IconButton size="small" title="复制" disabled>
+        <IconButton size="small" title="Copy" disabled>
           <ContentCopy />
         </IconButton>
-        <IconButton size="small" title="粘贴" disabled>
+        <IconButton size="small" title="Paste" disabled>
           <ContentPaste />
         </IconButton>
         <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-        <Box sx={{position: "relative", mt: 1}}>
+        <Box sx={{ position: "relative", mt: 1 }}>
           <If v-if={depth % 2 === 0}>
             <LinearScale />
             <Else>
@@ -1041,6 +1090,25 @@ export const Timeline2 = (props: {
           </If>
         </Box>
         <Typography p={1}>{depth % 2 ? "Parallel" : "Sequential"}</Typography>
+        <Divider />
+        <Typography p={1}>{`Current Event: ${
+          timeNodes.objs[globalTime[0]]?.id ?? "Null"
+        }`}</Typography>
+        <Box flexGrow={1} />
+        <Box mr={2}>
+          <IconButton
+            size="small"
+            title="Remove Event"
+            onClick={() => handleDeleteToolClick()}
+            sx={{
+              '&:hover': {
+                color: theme.palette.error.main
+              }
+            }}
+          >
+            <DeleteOutline />
+          </IconButton>
+        </Box>
       </Stack>
       <HorizontalScroller sx={{ height: "100%" }} ref={timeAreaRef}>
         <Box
@@ -1054,8 +1122,8 @@ export const Timeline2 = (props: {
             ref={canvasRef}
             component="canvas"
             sx={{
-              position: "relative",
-              width: canvasWidth ?? "100%",
+              position: "absolute",
+              width: timeNodeBoxRef.current?.scrollWidth ?? "100%",
               height: "100%",
               zIndex: 150,
               visibility: nodeDragging ? "hidden" : "visible",
@@ -1109,8 +1177,10 @@ export const Timeline2 = (props: {
                           idx={-1}
                           id={""}
                           highlight={
-                            nodeDragging.id !== globalTime[0] ? "none"
-                              : depth % 2 ? "par"
+                            nodeDragging.id !== globalTime[0]
+                              ? "none"
+                              : depth % 2
+                              ? "par"
                               : "ser"
                           }
                           folded={nodeDragging.id in timeNodes.arrs}
@@ -1131,6 +1201,6 @@ export const Timeline2 = (props: {
           </DndContext>
         </Box>
       </HorizontalScroller>
-    </React.Fragment>
+    </Box>
   );
 };

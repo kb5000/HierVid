@@ -7,6 +7,7 @@ export interface BranchConfig {
   selectedPattern: number;
   videos: Record<string, string>;
   videoPos: Position[];
+  videoLength: Record<string, number | null>;
   videoText: Record<
     string,
     Position & {
@@ -40,6 +41,7 @@ export const initConfig = () =>
         text: "",
       },
     },
+    videoLength: {},
     type: "Branch",
     prefix: "Branching Module 1",
   } as BranchConfig);
@@ -55,49 +57,49 @@ export const generateBranchConfig = (
   if (template) {
     draft.templateData.template = "Branch";
     draft.templateData.templateConfig = config;
-    draft.objTab.root.rootLayout = p + "start";
+    draft.objTab.root.rootLayout = p + "window";
   }
   draft.templateData.componentConfig[p] = config;
-  draft.objTab[p + "start"] = {
-    id: p + "start",
-    type: "Video",
-    layoutType: "Layout",
-    data: {
-      src: config.videos["start"] ?? "",
-      sx: {
-        objectFit: "cover",
-      },
-      loop: false,
-      time: 0,
-      volume: 100,
-      length: null,
-      play: true,
-    },
-  };
-  draft.timeNodes[p + "start"] = {
-    id: p + "start",
-    parent: parent,
-    width: 144,
-    data: {
-      component: p,
-      type: "Branch",
-    },
-    ports: [{ target: p + "window", fromTime: 1, toTime: 0 }],
-  };
-  if (addPos === -1) {
-    draft.timeArrs[parent ?? "_null"].push(p + "start");
-  } else {
-    draft.timeArrs[parent ?? "_null"].splice(addPos, 0, p + "start");
-    addPos += 1
-  }
-  draft.events.push({
-    sender: p + "start",
-    event: "onClick",
-    action: "jump",
-    args: {
-      target: p + "window",
-    },
-  });
+  // draft.objTab[p + "start"] = {
+  //   id: p + "start",
+  //   type: "Video",
+  //   layoutType: "Layout",
+  //   data: {
+  //     src: config.videos["start"] ?? "",
+  //     sx: {
+  //       objectFit: "cover",
+  //     },
+  //     loop: false,
+  //     time: 0,
+  //     volume: 100,
+  //     length: config.videoLength["start"] ?? null,
+  //     play: true,
+  //   },
+  // };
+  // draft.timeNodes[p + "start"] = {
+  //   id: p + "start",
+  //   parent: parent,
+  //   width: 144,
+  //   data: {
+  //     component: p,
+  //     type: "Branch",
+  //   },
+  //   ports: [{ target: p + "window", fromTime: 1, toTime: 0 }],
+  // };
+  // if (addPos === -1) {
+  //   draft.timeArrs[parent ?? "_null"].push(p + "start");
+  // } else {
+  //   draft.timeArrs[parent ?? "_null"].splice(addPos, 0, p + "start");
+  //   addPos += 1
+  // }
+  // draft.events.push({
+  //   sender: p + "start",
+  //   event: "onClick",
+  //   action: "jump",
+  //   args: {
+  //     target: p + "window",
+  //   },
+  // });
   if (config.style === 0) {
     const windowChildren = [
       {
@@ -161,7 +163,7 @@ export const generateBranchConfig = (
         loop: true,
         time: 0,
         volume: 100,
-        length: null,
+        length: config.videoLength["branch"] ?? null,
         play: true,
       },
     };
@@ -190,7 +192,7 @@ export const generateBranchConfig = (
           loop: true,
           time: 0,
           volume: 100,
-          length: null,
+          length: config.videoLength["branch_" + i] ?? null,
           play: true,
         },
       };
@@ -305,7 +307,7 @@ export const generateBranchConfig = (
         loop: false,
         time: 0,
         volume: 100,
-        length: null,
+        length: config.videoLength["content_" + i] ?? null,
         play: true,
       },
     };

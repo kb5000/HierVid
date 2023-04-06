@@ -17,12 +17,21 @@ export const getWebDavInstance = (): Webdav => {
   return webdavConnection;
 };
 
-const globalVideoCoverCache: Record<string, string | null> = {}
+type VideoCoverAndLength = {
+  cover: string,
+  length: number | null,
+}
+
+const globalVideoCoverCache: Record<string, VideoCoverAndLength | null> = {}
 
 export const getVideoCover = (
   videoUrl: string
 ) => {
-  return new Promise<string>((resolve, reject) => {
+  return new Promise<{cover: string, length: number | null}>((resolve, reject) => {
+    if (videoUrl === "") {
+      resolve({cover: "/img/Group 38.png", length: null})
+      return
+    }
     if (videoUrl in globalVideoCoverCache) {
       if (globalVideoCoverCache[videoUrl] !== null) {
         resolve(globalVideoCoverCache[videoUrl]!)
@@ -49,7 +58,7 @@ export const getVideoCover = (
         canvas.height = video.videoHeight;
         canvas.getContext("2d")?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
         // console.log(video, canvas)
-        const res = canvas.toDataURL("image/webp")
+        const res = {cover: canvas.toDataURL("image/webp"), length: video.duration}
         globalVideoCoverCache[videoUrl] = res
         resolve(res);
       });

@@ -1,4 +1,4 @@
-import { Stack, TextField, Typography } from "@mui/material";
+import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { ModelEditContext } from "../../../pages/flowPages/Detailed";
 import { Layout } from "../../../schema/PlayModel";
@@ -88,16 +88,22 @@ export const TextPropertyPage = (props: {
 
   return (
     <Stack spacing={1}>
-      <Typography fontSize="1.3em">文本设置</Typography>
+      <Typography fontSize="1.3em">Text Setting</Typography>
       <TextField
         variant="standard"
-        label="点击跳转到"
+        label="Jump to"
+        select
         value={clickTo ?? ""}
         onChange={(val) => handleChange(val.target.value, "jump")}
-      />
+      >
+        <MenuItem key="" value="">(None)</MenuItem>
+        {Object.keys(model.timeNodes).map(x => (
+          <MenuItem key={x} value={x}>{x}</MenuItem>
+        ))}
+      </TextField>
       <TextField
         variant="standard"
-        label="文字内容"
+        label="Text Content"
         value={data.content}
         onChange={(val) => handleChange(val.target.value, "text")}
       />

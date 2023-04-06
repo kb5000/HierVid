@@ -136,6 +136,10 @@ export const handleUpdateComponent = (name: string | undefined, type: string | u
     }
     model.timeArrs[parent ?? "_null"] = newTimeArr
 
+    for (const i in model.timeNodes) {
+      model.timeNodes[i].ports = model.timeNodes[i].ports.filter(x => !allComponentNodes.has(x.target))
+    }
+
     // 执行添加
 
     const config = model.templateData.componentConfig[name]

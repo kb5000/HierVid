@@ -110,7 +110,7 @@ export const ComparisonEdit = (props: any) => {
     const url = URIBase + "/Videos/" + file.name
     const [width, height] = slotSizes.current[idx] || [400, 800];
     console.log(width, height);
-    const cover = await getVideoCover(turl);
+    const {cover} = await getVideoCover(turl);
     setSlots((slots) => {
       const state = [...slots];
       if (page === 0) {

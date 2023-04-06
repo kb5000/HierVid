@@ -80,7 +80,7 @@ const menuData = [
   {
     name: "Unit Editor",
     content: [
-      { name: "Config 1" },
+      { name: "Project 1" },
       // { name: "场景2" },
     ],
   },
@@ -89,6 +89,11 @@ const menuData = [
 const classSelectData: Record<string, any> = (() => {
   const res = {
     Recommended: [
+      {
+        text: "Leisure & Entertainment",
+        img: "/img/类别_640.jpg",
+        description: "",
+      }
     ],
   };
   const extra = [
@@ -315,12 +320,16 @@ export const PHome = (props: any) => {
                   height: "100%",
                   width: "100%",
                   overflow: "auto",
-                  background: theme.palette.grey[100],
+                  // background: theme.palette.grey[100],
+                  backgroundColor: "white",
                 }}
               >
                 {
                   [
-                    <Box sx={{ background: theme.palette.grey[100] }}>
+                    <Box sx={{
+                      // background: theme.palette.grey[100]
+                      backgroundColor: "white",
+                    }}>
                       <SelectClass
                         name={
                           menuData[activeMenu[0]]?.content[activeMenu[1]]?.name
@@ -369,7 +378,7 @@ export const PHome = (props: any) => {
           >
             Yes
           </Button>
-          <Button onClick={() => setDialogOpen(-1)}>否</Button>
+          <Button onClick={() => setDialogOpen(-1)}>No</Button>
         </DialogActions>
       </Dialog>
       <Dialog

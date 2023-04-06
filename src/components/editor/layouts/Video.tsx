@@ -3,7 +3,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { v4 } from "uuid";
 import { ModelEditContext } from "../../../pages/flowPages/Detailed";
 import { Layout } from "../../../schema/PlayModel";
-import { getWebDavInstance, URIBase } from "../../../tools/Backend";
+import { getVideoCover, getWebDavInstance, URIBase } from "../../../tools/Backend";
 import { VideoProps } from "../../player/layouts/Video";
 import { Uploader } from "../../Uploader";
 import { EditorArgs } from "../EditorWrapper";
@@ -129,7 +129,7 @@ export const VideoPropertyPage = (props: { layout: Layout }) => {
     }
   };
 
-  const handleUploadClick = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadClick = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!fileRef.current) {
       return
     }
@@ -137,8 +137,10 @@ export const VideoPropertyPage = (props: { layout: Layout }) => {
     if (fileRef.current.files?.length) {
       const file = fileRef.current.files[0]
       const webdav = getWebDavInstance()
-      const id = v4()
-      const path ="/asset/" + id + ".mp4"
+      // const id = v4()
+      const turl = URL.createObjectURL(file);
+      const path = "/Videos/" + file.name;
+      const {cover, length} = await getVideoCover(turl);
       webdav.uploadFile(path, file)
         .then(res => {
           chgModel(model => {
@@ -146,6 +148,7 @@ export const VideoPropertyPage = (props: { layout: Layout }) => {
               model.objTab[props.layout.id] as Layout
             ).data;
             data.src = URIBase + path
+            data.length = length ?? 0
           })
         })
         .catch(err => {
@@ -156,26 +159,35 @@ export const VideoPropertyPage = (props: { layout: Layout }) => {
 
   return (
     <Stack spacing={1}>
-      <Typography fontSize="1.3em">视频设置</Typography>
+      <Typography fontSize="1.3em">Video Setting</Typography>
       <TextField
         variant="standard"
-        label="点击跳转到"
+        label="Jump to"
+        select
         value={clickTo ?? ""}
         onChange={(val) => handleChange(val.target.value, "jump")}
-      />
+      >
+        <MenuItem key="" value="">(None)</MenuItem>
+        {Object.keys(model.timeNodes).map(x => (
+          <MenuItem key={x} value={x}>{x}</MenuItem>
+        ))}
+      </TextField>
       <TextField
         variant="standard"
-        label="视频地址"
+        label="Video Source"
         value={data.src}
+        select
         onChange={(val) => handleChange(val.target.value, "src")}
-      />
+      >
+        <MenuItem value={data.src}>{data.src}</MenuItem>
+      </TextField>
       <Box sx={{width: 60, height: 30.75}}>
         <Box
           sx={{
             position: "absolute",
           }}
         >
-          <Button variant="contained" size="small">上传</Button>
+          <Button variant="contained" size="small">Upload</Button>
           <Uploader ref={fileRef} onChange={handleUploadClick} />
         </Box>
       </Box>
@@ -183,12 +195,12 @@ export const VideoPropertyPage = (props: { layout: Layout }) => {
         required
         select
         variant="standard"
-        label="视频循环"
+        label="Video Loop"
         value={data.loop ? "true" : "false"}
         onChange={(val) => handleChange(val.target.value, "loop")}
       >
-        <MenuItem key="0" value="false">不循环</MenuItem>
-        <MenuItem key="1" value="true">无限循环</MenuItem>
+        <MenuItem key="0" value="false">No</MenuItem>
+        <MenuItem key="1" value="true">Yes</MenuItem>
       </TextField>
     </Stack>
   );

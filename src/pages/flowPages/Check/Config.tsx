@@ -6,6 +6,7 @@ export interface CheckConfig {
   style: 0 | 1;
   selectedPattern: number;
   videos: Record<string, string>
+  videoLength: Record<string, number | null>
   videoPos: Position[]
   videoText: Record<
     string,
@@ -23,6 +24,7 @@ export const initConfig = () =>
     style: 0,
     selectedPattern: 0,
     videos: {},
+    videoLength: {},
     videoPos: [],
     videoText: {
       "branch_0": {
@@ -115,7 +117,7 @@ export const generateCheckConfig = (draft: PlayModel, config: CheckConfig, templ
         loop: true,
         time: 0,
         volume: 100,
-        length: null,
+        length: config.videoLength["branch"] ?? null,
         play: true,
       },
     };
@@ -144,7 +146,7 @@ export const generateCheckConfig = (draft: PlayModel, config: CheckConfig, templ
           loop: true,
           time: 0,
           volume: 100,
-          length: null,
+          length: config.videoLength["branch_" + i] ?? null,
           play: true,
         },
       };
@@ -257,7 +259,7 @@ export const generateCheckConfig = (draft: PlayModel, config: CheckConfig, templ
         loop: false,
         time: 0,
         volume: 100,
-        length: null,
+        length: config.videoLength["content_" + i] ?? null,
         play: true,
       },
     };

@@ -9,7 +9,7 @@ import { LayoutType } from "../player/LayoutWrapper"
 import { ImageEditor } from "./layouts/Image"
 import { HVStackEditor, HVStackProps, ZStackEditor, ZStackProps } from "./layouts/Stacks"
 import { TextEditor, TextProps } from "./layouts/Text"
-import { VideoEditor } from "./layouts/Video"
+import { VideoEditor, VideoProps } from "./layouts/Video"
 
 export type { LayoutType } from "../player/LayoutWrapper"
 
@@ -22,6 +22,10 @@ export interface EditorArgs {
 }
 
 export const EditorWrapper = (props: {layout: Layout, reactive: Observable<ObservableEvent>, objs: Record<string, any>, state: Record<string, any>}) => {
+  useEffect(() => {
+    console.log(props)
+  })
+
   const [editorArgs, chgEditorArgs] = useImmer<EditorArg>({
     selected: false
   })
@@ -47,15 +51,16 @@ export const EditorWrapper = (props: {layout: Layout, reactive: Observable<Obser
 
   const inner = () => {
     const argObj = {
-      id: props.layout.id,
-      data: props.layout.data,
+      id: props.layout?.id,
+      data: props.layout?.data,
       reactive: props.reactive,
       objs: props.objs,
       editorArgs: editorArgs,
       state: props.state,
+      layout: props.layout,
     }
 
-    switch (props.layout.type as LayoutType) {
+    switch (props.layout?.type as LayoutType) {
       case "HVStack":
         return <HVStackEditor {...argObj} />
       case "ZStack":
@@ -77,7 +82,7 @@ export const EditorWrapper = (props: {layout: Layout, reactive: Observable<Obser
         position: "relative",
         height: "100%",
         width: "100%",
-        p: "12px",
+        p: "2px",
         background: "rgba(160, 160, 160, 0.15)",
         outline: editorArgs.selected ? "4px dashed #1976d2" : "inherit",
         cursor: "pointer",
@@ -99,14 +104,19 @@ export const EditorWrapper = (props: {layout: Layout, reactive: Observable<Obser
 export const emptyLayout = (parent: string) => {
   return {
     id: v4(),
-    type: "Text",
+    type: "Video",
     layoutType: "Layout",
     parent,
     endTo: null,
     data: {
-      content: "",
+      src: '',
       sx: {},
-    } as TextProps["data"]
+      loop: false,
+      time: 0,
+      volume: 100,
+      length: 0,
+      play: false,
+    } as VideoProps["data"]
   } as Layout
 }
 

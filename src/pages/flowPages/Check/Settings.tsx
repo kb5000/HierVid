@@ -193,24 +193,32 @@ const textPosList: () => Record<string, Position[]> = () => ({
   ],
 });
 
-export const CheckDialog = (props: {data: {name?: string}, onSuccessClick: () => void, onButtonClick: () => void}) => {
+export const CheckDialog = (props: {
+  data: { name?: string };
+  onSuccessClick: () => void;
+  onButtonClick: () => void;
+}) => {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const [changed, setChanged] = useState(false);
   const [model, chgModel] = useContext(ModelEditContext)!;
   const [unnamedConfig, chgUnnamedConfig] = useImmer<CheckConfig>(
     model.templateData.template === "Check"
-      ? model.templateData.templateConfig as CheckConfig
+      ? (model.templateData.templateConfig as CheckConfig)
       : initConfig()
   );
-  const namedConfig = model.templateData.componentConfig[props.data.name ?? ""]
+  const namedConfig = model.templateData.componentConfig[props.data.name ?? ""];
   const chgNamedConfig = (config: (draft: CheckConfig) => void) => {
-    chgModel(draft => {
-      config(draft.templateData.componentConfig[props.data.name!] as CheckConfig)
-    })
-  }
-  const config = props.data.name ? namedConfig as CheckConfig : unnamedConfig
-  const chgConfig = props.data.name ? chgNamedConfig : chgUnnamedConfig
+    chgModel((draft) => {
+      config(
+        draft.templateData.componentConfig[props.data.name!] as CheckConfig
+      );
+    });
+  };
+  const config = props.data.name ? (namedConfig as CheckConfig) : unnamedConfig;
+  const chgConfig = props.data.name ? chgNamedConfig : chgUnnamedConfig;
+
+  const [imgSrc, setImgSrc] = useState("/img/comp/head/2.png")
 
   const handleSuccessClick = () => {
     chgModel((model) => {
@@ -221,21 +229,25 @@ export const CheckDialog = (props: {data: {name?: string}, onSuccessClick: () =>
   };
 
   useEffect(() => {
-    const textPos = textPosList()["" + config.branchNumber]
-    chgConfig(config => {
+    const textPos = textPosList()["" + config.branchNumber];
+    chgConfig((config) => {
       for (let i = 0; i < textPos.length; i++) {
         config.videoText["branch_" + i] = {
           ...textPos[i],
           text: config.videoText["branch_" + i]?.text ?? "",
-        }
+        };
       }
-    })
+    });
     if (config.style === 1) {
-      const videoPos = videoPosList()[config.branchNumber + "_" + config.selectedPattern]
-      chgConfig(config => {
+      const videoPos =
+        videoPosList()[config.branchNumber + "_" + config.selectedPattern];
+      chgConfig((config) => {
         config.videoPos = videoPos;
-      })
+      });
     }
+    setImgSrc(config.branchNumber === 2 && config.style === 0 || config.branchNumber === 3 ?
+      "/img/comp/head/" + config.branchNumber + (config.branchNumber === 3 && config.style === 1 ? "s" + config.selectedPattern : "") + ".png"
+      : "/img/模版3-详情_640.jpg")
   }, [config.branchNumber, config.selectedPattern, config.style]);
 
   return (
@@ -248,7 +260,9 @@ export const CheckDialog = (props: {data: {name?: string}, onSuccessClick: () =>
         </Stack>
         <Stack direction="row" mt={1} px={1}>
           <Box flexGrow={1} mr={2}>
-            <Typography variant="h4">{props.data.name ? "Comparing Module" : "Comparison Template"}</Typography>
+            <Typography variant="h4">
+              {props.data.name ? "Comparing Module" : "Comparison Template"}
+            </Typography>
             <Typography
               sx={{
                 mt: 1,
@@ -276,7 +290,7 @@ export const CheckDialog = (props: {data: {name?: string}, onSuccessClick: () =>
                 />
               </Stack>
               <Stack direction="row" mt={2}>
-                <Typography mt={1}>Branch Style</Typography>
+                <Typography mt={1}>Root Style</Typography>
                 <Box flexGrow={1} />
                 <Select
                   size="small"
@@ -331,12 +345,13 @@ export const CheckDialog = (props: {data: {name?: string}, onSuccessClick: () =>
           >
             <Box
               component="img"
-              src={process.env.PUBLIC_URL + "/img/模版3-详情_640.jpg"}
+              src={process.env.PUBLIC_URL + imgSrc}
               alt={"模板1"}
               sx={{
                 position: "relative",
                 left: "-8px",
                 top: "-4px",
+                objectFit: 'fill',
               }}
             />
           </Paper>
@@ -381,7 +396,9 @@ export const CheckDialog = (props: {data: {name?: string}, onSuccessClick: () =>
                     chgConfig((conf) => {
                       conf.selectedPattern = idx;
                       if (config.style === 0) {
-                        enqueueSnackbar("默认模式下无需选择布局", { variant: 'warning' })
+                        enqueueSnackbar("默认模式下无需选择布局", {
+                          variant: "warning",
+                        });
                       } else {
                         setChanged(true);
                       }
@@ -398,41 +415,46 @@ export const CheckDialog = (props: {data: {name?: string}, onSuccessClick: () =>
   );
 };
 
-export const CheckComponentSetting = (props: {name: string}) => {
+export const CheckComponentSetting = (props: { name: string }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [model, chgModel] = useContext(ModelEditContext)!;
-  const config = model.templateData.componentConfig[props.name] as CheckConfig
+  const config = model.templateData.componentConfig[props.name] as CheckConfig;
   const chgConfig = (config: (draft: CheckConfig) => void) => {
-    chgModel(draft => {
-      config(draft.templateData.componentConfig[props.name] as CheckConfig)
-    })
-  }
-  const [videoSelection, setVideoSelection] = useState(config.style === 0 ? "branch" : "branch_1");
-  const [uploadState, setUploadState] = useState<"noupload" | "uploading" | "uploaded">("noupload")
+    chgModel((draft) => {
+      config(draft.templateData.componentConfig[props.name] as CheckConfig);
+    });
+  };
+  const [videoSelection, setVideoSelection] = useState(
+    config.style === 0 ? "branch" : "branch_1"
+  );
+  const [uploadState, setUploadState] = useState<
+    "noupload" | "uploading" | "uploaded"
+  >("noupload");
 
   useEffect(() => {
-    setVideoSelection(config.style === 0 ? "branch" : "branch_1")
-  }, [props.name])
+    setVideoSelection(config.style === 0 ? "branch" : "branch_1");
+  }, [props.name]);
 
   useEffect(() => {
-    setUploadState("noupload")
-  }, [videoSelection])
+    setUploadState("noupload");
+  }, [videoSelection]);
 
   useEffect(() => {
-    const textPos = textPosList()["" + config.branchNumber]
-    chgConfig(config => {
+    const textPos = textPosList()["" + config.branchNumber];
+    chgConfig((config) => {
       for (let i = 0; i < textPos.length; i++) {
         config.videoText["branch_" + i] = {
           ...textPos[i],
           text: config.videoText["branch_" + i]?.text ?? "",
-        }
+        };
       }
-    })
+    });
     if (config.style === 1) {
-      const videoPos = videoPosList()[config.branchNumber + "_" + config.selectedPattern]
-      chgConfig(config => {
+      const videoPos =
+        videoPosList()[config.branchNumber + "_" + config.selectedPattern];
+      chgConfig((config) => {
         config.videoPos = videoPos;
-      })
+      });
     }
   }, [config.branchNumber, config.selectedPattern, config.style]);
 
@@ -440,16 +462,16 @@ export const CheckComponentSetting = (props: {name: string}) => {
     if (!e.target.files?.length) {
       return;
     }
-    setUploadState('uploading')
+    setUploadState("uploading");
     const file = e.target.files[0];
     const content = await file.arrayBuffer();
     await getWebDavInstance().uploadFile("/Videos/" + file.name, content);
     const url = URIBase + "/Videos/" + file.name;
-    chgConfig(config => {
+    chgConfig((config) => {
       config.videos[videoSelection] = url;
-    })
-    setUploadState('uploaded')
-  }
+    });
+    setUploadState("uploaded");
+  };
 
   return (
     <>
@@ -469,7 +491,7 @@ export const CheckComponentSetting = (props: {name: string}) => {
           />
         </Stack>
         <Stack direction="row">
-          <Typography mt={1}>Branch Style</Typography>
+          <Typography mt={1}>Root Style</Typography>
           <Box flexGrow={1} />
           <Select
             size="small"
@@ -514,40 +536,43 @@ export const CheckComponentSetting = (props: {name: string}) => {
             <Box sx={{ position: "relative", minWidth: "1px" }} />
           </Stack>
         </HorizontalScroller>
-        <Typography>Upload video</Typography>
-        <Select
-          size="small"
-          value={videoSelection}
-          onChange={(e) => {
-            setVideoSelection(e.target.value);
-          }}
-        >
-          {config.style === 0 ? (
-            <MenuItem value={"branch"} key="branch">
-              Branching
-            </MenuItem>
-          ) : (
-            Array.from(new Array(config.branchNumber)).map((k, idx) => (
-              <MenuItem
-                value={"branch_" + idx}
-                key={"branch_" + idx}
-              >
+        <If v-if={false}>
+          <Typography>Upload video</Typography>
+          <Select
+            size="small"
+            value={videoSelection}
+            onChange={(e) => {
+              setVideoSelection(e.target.value);
+            }}
+          >
+            {config.style === 0 ? (
+              <MenuItem value={"branch"} key="branch">
+                Branching
+              </MenuItem>
+            ) : (
+              Array.from(new Array(config.branchNumber)).map((k, idx) => (
+                <MenuItem value={"branch_" + idx} key={"branch_" + idx}>
+                  Branch {idx + 1}
+                </MenuItem>
+              ))
+            )}
+            {Array.from(new Array(config.branchNumber)).map((k, idx) => (
+              <MenuItem value={"content_" + idx} key={"content_" + idx}>
                 Branch {idx + 1}
               </MenuItem>
-            ))
-          )}
-          {Array.from(new Array(config.branchNumber)).map((k, idx) => (
-            <MenuItem
-              value={"content_" + idx}
-              key={"content_" + idx}
-            >
-              Branch {idx + 1}
-            </MenuItem>
-          ))}
-        </Select>
-        <Box component="input" aria-label="uploader" type="file" onChange={handleFileUploaded} />
-        <If v-if={uploadState !== "noupload"}>
-          <Typography>{uploadState === "uploading" ? "上传中，请等待" : "上传成功"}</Typography>
+            ))}
+          </Select>
+          <Box
+            component="input"
+            aria-label="uploader"
+            type="file"
+            onChange={handleFileUploaded}
+          />
+          <If v-if={uploadState !== "noupload"}>
+            <Typography>
+              {uploadState === "uploading" ? "上传中，请等待" : "上传成功"}
+            </Typography>
+          </If>
         </If>
       </Stack>
     </>

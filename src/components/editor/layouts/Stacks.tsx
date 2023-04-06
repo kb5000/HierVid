@@ -178,11 +178,11 @@ export const HVStackPropertyPage = (props: {
 
   return (
     <Stack spacing={1}>
-      <Typography fontSize="1.3em">分割设置</Typography>
+      <Typography fontSize="1.3em">Split Setting</Typography>
       <TextField
         required
         variant="standard"
-        label="分割数量"
+        label="Split Number"
         type="number"
         value={data.children.length}
         onChange={(val) => handleChange(val.target.value, "entries")}
@@ -191,12 +191,12 @@ export const HVStackPropertyPage = (props: {
         required
         select
         variant="standard"
-        label="分割方向"
+        label="Split Direction"
         value={data.vertical ? "true" : "false"}
         onChange={(val) => handleChange(val.target.value, "direction")}
       >
-        <MenuItem key="0" value="false">水平</MenuItem>
-        <MenuItem key="1" value="true">竖直</MenuItem>
+        <MenuItem key="0" value="false">Horizontal</MenuItem>
+        <MenuItem key="1" value="true">Vertical</MenuItem>
       </TextField>
     </Stack>
   )
@@ -247,11 +247,11 @@ export const ZStackPropertyPage = (props: {
 
   return (
     <Stack spacing={1}>
-      <Typography fontSize="1.3em">浮窗设置</Typography>
+      <Typography fontSize="1.3em">Window Setting</Typography>
       <TextField
         required
         variant="standard"
-        label="浮窗数量"
+        label="Window Number"
         type="number"
         value={data.children.length}
         onChange={(val) => handleChange(val.target.value, "entries")}

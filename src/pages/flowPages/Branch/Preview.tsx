@@ -43,7 +43,7 @@ export const BranchPreview = (props: any) => {
             }}
           />
           <Box px={2}/>
-          <Typography mt={1}>Branch Style</Typography>
+          <Typography mt={1}>Root Style</Typography>
           <Select
             size="small"
             value={data[1]}

@@ -14,7 +14,7 @@ import addButtons from "../../../assets/img/addButton.svg";
 import { If } from "../../../components/Vue";
 import { Uploader } from "../../../components/Uploader";
 import React from "react";
-import { getWebDavInstance, URIBase } from "../../../tools/Backend";
+import { getVideoCover, getWebDavInstance, URIBase } from "../../../tools/Backend";
 import { clearModel, PlayModel } from "../../../schema/PlayModel";
 import { ModelEditContext } from "../Detailed";
 import { useImmer } from "use-immer";
@@ -136,10 +136,12 @@ export const BranchEdit = (props: any) => {
     const file = e.target.files[0];
     const content = await file.arrayBuffer();
     await getWebDavInstance().uploadFile("/Videos/" + file.name, content);
-    // const turl = URL.createObjectURL(file);
+    const turl = URL.createObjectURL(file);
     const url = URIBase + "/Videos/" + file.name;
+    const cover = await getVideoCover(turl);
     chgConfig((config) => {
       config.videos[key] = url;
+      config.videoLength[key] = cover.length;
     });
   };
 

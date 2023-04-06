@@ -43,20 +43,24 @@ export const ResizableBox = (props: {
   };
 
   const handleGlobalMouseMove = (e: MouseEvent) => {
+    if (currentMove) {
+      console.log("inisState = ", initState);
+      console.log("bound = ", props.bound);
+    }
     switch (currentMove) {
       case "ns":
         notifyState([
           initState[0],
           initState[1],
           initState[2],
-          bounded(initState[3] + (e.screenY - initPos[1]), 1, props.bound.height - initState[1]),
+          bounded(initState[3] + (e.screenY - initPos[1]), 1, props.bound.height - initState[0]),
         ]);
         break;
       case "ew":
         notifyState([
           initState[0],
           initState[1],
-          bounded(initState[2] + (e.screenX - initPos[0]), 1, props.bound.width - initState[0]),
+          bounded(initState[2] + (e.screenX - initPos[0]), 1, props.bound.width - initState[1]),
           initState[3],
         ]);
         break;
@@ -64,8 +68,8 @@ export const ResizableBox = (props: {
         notifyState([
           initState[0],
           initState[1],
-          bounded(initState[2] + (e.screenX - initPos[0]), 1, props.bound.width - initState[0]),
-          bounded(initState[3] + (e.screenY - initPos[1]), 1, props.bound.height - initState[1]),
+          bounded(initState[2] + (e.screenX - initPos[0]), 1, props.bound.width - initState[1]),
+          bounded(initState[3] + (e.screenY - initPos[1]), 1, props.bound.height - initState[0]),
         ]);
         break;
       case "move":
